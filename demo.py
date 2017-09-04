@@ -361,18 +361,6 @@ df_scatter(combined_df, 'Cryptocurrency Prices (USD)', seperate_y_axis=False, y_
 # which will convert each cell in the dataframe from an absolute price
 # value to a daily return percentage.
 
-# First we'll calculate correlations for 2016.
-
-# Calculate the pearson correlation coefficients for cryptocurrencies in 2016
-combined_df_2016 = combined_df[combined_df.index.year == 2016]
-combined_df_2016.pct_change().corr(method='pearson')
-
-# These correlation coefficients are all over the place. Coefficients
-# close to 1 or -1 mean that the series' are strongly correlated or
-# inversely correlated respectively, and coefficients close to zero
-# mean that the values are not correlated, and fluctuate independently
-# of each other.
-
 # To help visualize these results, we'll create one more helper
 # visualization function.
 
@@ -400,8 +388,9 @@ def correlation_heatmap(df, title, absolute_bounds=True):
             py.plot(fig)
 
     else:
-        print(" DEBUG - TO-DO - correlation_heatmap incomplete at this moment!...")
         z=df.corr(method='pearson').as_matrix()
+        print("z=df.corr(method='pearson').as_matrix() =")
+        print(z)
         x=df.columns.tolist()
         y=df.columns.tolist()
         title='Pearson Coefficient'
@@ -410,19 +399,37 @@ def correlation_heatmap(df, title, absolute_bounds=True):
         #fig, ax = plt.subplots(figsize=(x, y)
         fig, ax = plt.subplots(figsize= z.shape)
         ax.matshow( z )
-        
+
         # put the major ticks at the middle of each cell, notice "reverse" use of dimension
         #ax.set_yticks(np.arange(z.shape[0])+0.5, minor=False) # array([ 0.5,  1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5,  8.5,  9.5])
         #ax.set_xticks(np.arange(z.shape[1])+0.5, minor=False) # array([ 0.5,  1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5,  8.5,  9.5])
         ax.set_xticklabels(x, minor=False)
         ax.set_yticklabels(y, minor=False)
-        
+
         #plt.xticks(range(len(z.columns)), z.columns);
         #plt.yticks(range(len(z.columns)), z.columns);
         plt.show()
         #pdb.set_trace()
 
+
+# First we'll calculate correlations for 2016.
+
+# Calculate the pearson correlation coefficients for cryptocurrencies in 2016
+combined_df_2016 = combined_df[combined_df.index.year == 2016]
+combined_df_2016.pct_change().corr(method='pearson')
+
+print("combined_df_2016.pct_change() =")
+print(combined_df_2016.pct_change())
+
 correlation_heatmap(combined_df_2016.pct_change(), "Cryptocurrency Correlations in 2016")
+
+# These correlation coefficients are all over the place. Coefficients
+# close to 1 or -1 mean that the series' are strongly correlated or
+# inversely correlated respectively, and coefficients close to zero
+# mean that the values are not correlated, and fluctuate independently
+# of each other.
+
+print(' ')
 
 # Here, the dark red values represent strong correlations (note that
 # each currency is, obviously, strongly correlated with itself), and
@@ -440,6 +447,9 @@ correlation_heatmap(combined_df_2016.pct_change(), "Cryptocurrency Correlations 
 
 combined_df_2017 = combined_df[combined_df.index.year == 2017]
 combined_df_2017.pct_change().corr(method='pearson')
+
+print("combined_df_2017.pct_change() =")
+print(combined_df_2017.pct_change())
 
 # These are somewhat more significant correlation coefficients. Strong
 # enough to use as the sole basis for an investment? Certainly not.
