@@ -171,21 +171,21 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
                 trace['yaxis'] = 'y{}'.format(index + 1)
                 layout['yaxis{}'.format(index + 1)] = y_axis_config
             trace_arr.append(trace)
-            
+
         fig = go.Figure(data=trace_arr, layout=layout)
         if useJupyterNotebook:
             py.iplot(fig)
         else:
             py.plot(fig)
-            
+
     else:
         # Use Matplotlib instead of plotly:
         for index, series in enumerate(series_arr):
             trace = { "x" : series.index, "y" : series, "name" : label_arr[index] }
             trace_arr.append(trace)
-            
+
         for i in range(len(trace_arr)):
-            plt.plot(trace_arr[i]["x"],  trace_arr[i]["y"],  label = 'id %s'%trace_arr[i]["name"]) 
+            plt.plot(trace_arr[i]["x"],  trace_arr[i]["y"],  label = 'id %s'%trace_arr[i]["name"])
         if scale=='log':
             plt.yscale('log')
         plt.grid(True)
@@ -232,7 +232,7 @@ else:
     plt.grid(True)
     plt.legend()
     plt.show()
-        
+
     #pdb.set_trace()
 
 
@@ -265,8 +265,8 @@ def get_json_data(json_url, cache_path):
 # to save the resulting data.
 
 base_polo_url = 'https://poloniex.com/public?command=returnChartData&currencyPair={}&start={}&end={}&period={}'
-#start_date = datetime.strptime('2015-01-01', '%Y-%m-%d') # get data from the start of 2015
-start_date = datetime.strptime('2017-07-01', '%Y-%m-%d')
+start_date = datetime.strptime('2015-01-01', '%Y-%m-%d') # get data from the start of 2015
+#start_date = datetime.strptime('2017-07-01', '%Y-%m-%d')
 end_date = datetime.now() # up until today
 pediod = 86400 # pull daily data (86,400 seconds per day)
 
@@ -317,7 +317,7 @@ for altcoin in altcoin_data.keys():
 # dataframe of the USD price for each cryptocurrency.
 
 # Merge USD price of each altcoin into single dataframe
-combined_df = merge_dfs_on_column(list(altcoin_data.values()), list(altcoin_data.keys()), 'price_usd')
+combined_df = merge_dfs_on_column( list(altcoin_data.values()), list(altcoin_data.keys()), 'price_usd' )
 
 # Easy. Now let's also add the Bitcoin prices as a final column to the
 # combined dataframe ==> Add BTC price to the dataframe
@@ -393,14 +393,33 @@ def correlation_heatmap(df, title, absolute_bounds=True):
             heatmap['zmin'] = -1.0
 
         fig = go.Figure(data=[heatmap], layout=layout)
-        
+
         if useJupyterNotebook:
             py.iplot(fig)
         else:
             py.plot(fig)
-            
+
     else:
         print(" DEBUG - TO-DO - correlation_heatmap incomplete at this moment!...")
+        z=df.corr(method='pearson').as_matrix()
+        x=df.columns.tolist()
+        y=df.columns.tolist()
+        title='Pearson Coefficient'
+        # ----
+        #fig, ax = plt.subplots()
+        #fig, ax = plt.subplots(figsize=(x, y)
+        fig, ax = plt.subplots(figsize= z.shape)
+        ax.matshow( z )
+        
+        # put the major ticks at the middle of each cell, notice "reverse" use of dimension
+        #ax.set_yticks(np.arange(z.shape[0])+0.5, minor=False) # array([ 0.5,  1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5,  8.5,  9.5])
+        #ax.set_xticks(np.arange(z.shape[1])+0.5, minor=False) # array([ 0.5,  1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5,  8.5,  9.5])
+        ax.set_xticklabels(x, minor=False)
+        ax.set_yticklabels(y, minor=False)
+        
+        #plt.xticks(range(len(z.columns)), z.columns);
+        #plt.yticks(range(len(z.columns)), z.columns);
+        plt.show()
         #pdb.set_trace()
 
 correlation_heatmap(combined_df_2016.pct_change(), "Cryptocurrency Correlations in 2016")
