@@ -1,6 +1,8 @@
 import pickle
 from datetime import datetime
 import pandas as pd
+import quandl
+
 
 # =================================
 usePlotly = True # for jupyter notebook (plotly)

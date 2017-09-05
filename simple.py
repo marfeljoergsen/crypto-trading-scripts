@@ -10,7 +10,6 @@
 import os
 import numpy as np
 #import pandas as pd
-import quandl
 from lib import crypto_trading_lib as ctl
 #import pdb
 

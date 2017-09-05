@@ -2,7 +2,7 @@
 
 
 ## Getting Started
-Run the demo.
+Run the either the "simple.py" or the "demo.py".
 
 
 ### Prerequisites
