@@ -2,29 +2,32 @@ import pickle
 from datetime import datetime
 import pandas as pd
 import quandl
+import sys
+sys.path.insert(0, './lib')
+from plot_settings import *
 
 
 # =================================
-usePlotly = True # for jupyter notebook (plotly)
-usePlotly = False # for normal python (matplotlib)
-#---
-#useJupyterNotebook = True # (use py.iplot - shows directly in Jupyter NTB)
-useJupyterNotebook = False # (use py.plot - opens webpage in your browser)
-if usePlotly:
-    import plotly.offline as py
-    import plotly.graph_objs as go
-    import plotly.figure_factory as ff
-    py.init_notebook_mode(connected=True)
-else:
-    import matplotlib.pyplot as plt
-# =================================
-
+#usePlotly = True # for jupyter notebook (plotly)
+#usePlotly = False # for normal python (matplotlib)
+##---
+##useJupyterNotebook = True # (use py.iplot - shows directly in Jupyter NTB)
+#useJupyterNotebook = False # (use py.plot - opens webpage in your browser)
+#if usePlotly:
+#    import plotly.offline as py
+#    import plotly.graph_objs as go
+#    import plotly.figure_factory as ff
+#    py.init_notebook_mode(connected=True)
+#else:
+#    import matplotlib.pyplot as plt
+## =================================
 
 
 # Step 2 - Retrieve Bitcoin Pricing Data
 # --------------------------------------
 # To assist with this data retrieval we'll define a function to
 # download and cache datasets from Quandl.
+# ("Quandl Code ID" search e.g.: https://www.quandl.com/search?query= )
 def get_quandl_data(quandl_id, dataDir):
     '''Download and cache Quandl dataseries'''
     cache_path = dataDir + '{}.pkl'.format(quandl_id).replace('/','-')
@@ -66,6 +69,8 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
 
     label_arr = list(df)
     series_arr = list(map(lambda col: df[col], label_arr))
+
+    global usePlotly, useJupyterNotebook
 
     if usePlotly:
         layout = go.Layout(

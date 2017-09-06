@@ -7,39 +7,24 @@
 # Run "jupyter notebook" from shell to get the correct graphs.
 # =============================================================
 
-import os
 import numpy as np
 #import pandas as pd
-import quandl
 from lib import crypto_trading_lib as ctl
+import sys
+sys.path.insert(0, './lib')
+from plot_settings import *
 #import pdb
 
 #---
 dataDir = 'data/'
-
-# =================================
-usePlotly = True # for jupyter notebook (plotly)
-usePlotly = False # for normal python (matplotlib)
-#---
-#useJupyterNotebook = True # (use py.iplot - shows directly in Jupyter NTB)
-useJupyterNotebook = False # (use py.plot - opens webpage in your browser)
-if usePlotly:
-    import plotly.offline as py
-    import plotly.graph_objs as go
-    import plotly.figure_factory as ff
-    py.init_notebook_mode(connected=True)
-else:
-    import matplotlib.pyplot as plt
-# =================================
-
 
 
 
 # Step 2.2 - Pull Kraken Exchange Pricing Data
 # --------------------------------------------
 # Pull Kraken BTC price exchange data
+# ("Quandl Code ID" search e.g.: https://www.quandl.com/search?query= )
 btc_usd_price_kraken = ctl.get_quandl_data('BCHARTS/KRAKENUSD', dataDir)
-
 
 # Pull pricing data for 3 more BTC exchanges
 exchanges = ['COINBASE','BITSTAMP','ITBIT']
@@ -66,8 +51,6 @@ btc_usd_datasets.replace(0, np.nan, inplace=True)
 # We can now calculate a new column, containing the average daily
 # Bitcoin price across all of the exchanges.
 btc_usd_datasets['avg_btc_price_usd'] = btc_usd_datasets.mean(axis=1)
-
-
 
 
 # Step 3 - Retrieve Altcoin Pricing Data
@@ -103,7 +86,14 @@ print("Need to change this line into something with DKK: ")
 print("altcoin_data[altcoin]['price_usd'] =  altcoin_data[altcoin]['weightedAverage'] * btc_usd_datasets['avg_btc_price_usd']")
 
 for altcoin in altcoin_data.keys():
-    altcoin_data[altcoin]['price_usd'] =  altcoin_data[altcoin]['weightedAverage'] * btc_usd_datasets['avg_btc_price_usd']
+    if False:
+        test1 = altcoin_data[altcoin]['weightedAverage']
+        test2 = btc_usd_datasets['avg_btc_price_usd']
+        df1aligned, df2aligned = test1.align(test2)
+    #if altcoin_data[altcoin]['weightedAverage'].shape != btc_usd_datasets['avg_btc_price_usd'].shape
+    altcoin_data[altcoin]['price_usd'] = \
+        altcoin_data[altcoin]['weightedAverage'] * \
+        btc_usd_datasets['avg_btc_price_usd']
 
 
 # Here, we've created a new column in each altcoin dataframe with the
@@ -132,6 +122,21 @@ ctl.df_scatter(combined_df, 'Cryptocurrency Prices (USD)', seperate_y_axis=False
 # all of the currencies on the same plot. You are welcome to try out
 # different parameters values here (such as scale='linear') to get
 # different perspectives on the data.
+
+
+print("Need to do: Convert to DKK!")
+# EUR/USD (BUNDESBANK/BBEX3_D_USD_EUR_BB_AC_000): https://www.quandl.com/data/BUNDESBANK/BBEX3_D_USD_EUR_BB_AC_000-Euro-foreign-exchange-reference-rate-of-the-ECB-EUR-1-USD-United-States
+eur_usd_price = ctl.get_quandl_data('BUNDESBANK/BBEX3_D_USD_EUR_BB_AC_000', dataDir)
+#eur_usd_price = ctl.get_crypto_data
+#ctl.df_scatter(eur_usd_price, 'Price for 1 EUR in USD')
+
+
+# EUR/DKK (ECB/EURDKK): https://www.quandl.com/data/ECB/EURDKK-EUR-vs-DKK-Foreign-Exchange-Reference-Rate
+one_eur_in_dkk_price = ctl.get_quandl_data('ECB/EURDKK', dataDir)
+#one_eur_in_dkk_price = ctl.get_crypto_data
+#ctl.df_scatter(one_eur_in_dkk_price, 'Price for 1 EUR in DKK')
+
+
 
 
 # Step 3.4 - Perform Correlation Analysis
