@@ -29,20 +29,18 @@ btc_usd_price_kraken = ctl.get_quandl_data('BCHARTS/KRAKENUSD', dataDir)
 # Pull pricing data for 3 more BTC exchanges
 exchanges = ['COINBASE','BITSTAMP','ITBIT']
 
-exchange_data = {}
-
-exchange_data['KRAKEN'] = btc_usd_price_kraken
-
+# Storing Pandas DF in dict (data from KRAKEN + other exchanges):
+exchange_data = {} # dict
+exchange_data['KRAKEN'] = btc_usd_price_kraken # Pandas DF
 for exchange in exchanges:
     exchange_code = 'BCHARTS/{}USD'.format(exchange)
-    btc_exchange_df = ctl.get_quandl_data(exchange_code, dataDir)
+    btc_exchange_df = ctl.get_quandl_data(exchange_code, dataDir) # Pandas DF
     exchange_data[exchange] = btc_exchange_df
-
 
 # Now we will merge all of the dataframes together on their "Weighted
 # Price" column (merge the BTC price dataseries' into a single dataframe)
-
-btc_usd_datasets = ctl.merge_dfs_on_column( list(exchange_data.values()), list(exchange_data.keys()), 'Weighted Price' )
+btc_usd_datasets = ctl.merge_dfs_on_column( # def merge_dfs_on_column(dataframes, labels, col):
+        list(exchange_data.values()), list(exchange_data.keys()), 'Weighted Price' )
 
 # Remove "0" values
 btc_usd_datasets.replace(0, np.nan, inplace=True)
@@ -115,28 +113,55 @@ combined_df['BTC'] = btc_usd_datasets['avg_btc_price_usd']
 # cryptocurrency prices against each other.
 
 # Chart all of the altocoin prices
-ctl.df_scatter(combined_df, 'Cryptocurrency Prices (USD)', seperate_y_axis=False, y_axis_label='Coin Value (USD)', scale='log')
-ctl.df_scatter(combined_df, 'Cryptocurrency Prices (USD)', seperate_y_axis=False, y_axis_label='Coin Value (USD)')
-
+if False:
+    ctl.df_scatter(combined_df, 'Cryptocurrency Prices (USD)', seperate_y_axis=False, y_axis_label='Coin Value (USD)', scale='log')
+    ctl.df_scatter(combined_df, 'Cryptocurrency Prices (USD)', seperate_y_axis=False, y_axis_label='Coin Value (USD)')
 # Note that we're using a logarithmic y-axis scale in order to compare
 # all of the currencies on the same plot. You are welcome to try out
 # different parameters values here (such as scale='linear') to get
 # different perspectives on the data.
 
 
-print("Need to do: Convert to DKK!")
+plt.close('all') # Clean up - strictly not required
+print("Converting to DKK")
+
 # EUR/USD (BUNDESBANK/BBEX3_D_USD_EUR_BB_AC_000): https://www.quandl.com/data/BUNDESBANK/BBEX3_D_USD_EUR_BB_AC_000-Euro-foreign-exchange-reference-rate-of-the-ECB-EUR-1-USD-United-States
 eur_usd_price = ctl.get_quandl_data('BUNDESBANK/BBEX3_D_USD_EUR_BB_AC_000', dataDir)
 #eur_usd_price = ctl.get_crypto_data
 #ctl.df_scatter(eur_usd_price, 'Price for 1 EUR in USD')
 
-
 # EUR/DKK (ECB/EURDKK): https://www.quandl.com/data/ECB/EURDKK-EUR-vs-DKK-Foreign-Exchange-Reference-Rate
-one_eur_in_dkk_price = ctl.get_quandl_data('ECB/EURDKK', dataDir)
-#one_eur_in_dkk_price = ctl.get_crypto_data
-#ctl.df_scatter(one_eur_in_dkk_price, 'Price for 1 EUR in DKK')
+eur_in_dkk_price = ctl.get_quandl_data('ECB/EURDKK', dataDir)
+#eur_in_dkk_price = ctl.get_crypto_data
+#ctl.df_scatter(eur_in_dkk_price, 'Price for 1 EUR in DKK')
 
+#usd_in_dkk_price = eur_usd_price * eur_in_dkk_price
+usd_in_dkk_price = eur_in_dkk_price / eur_usd_price
+if False:
+    ctl.df_scatter(usd_in_dkk_price, 'Price for 1 USD in DKK')
+#usd_in_dkk_price=usd_in_dkk_price.asfreq('D')
 
+# import IPython; IPython.terminal.debugger.TerminalPdb().set_trace()
+if False:
+    btc_in_dkk_price = usd_in_dkk_price.multiply(btc_usd_price_kraken['Weighted Price'], axis='index')
+    ctl.df_scatter(btc_in_dkk_price, 'Cryptocurrency Prices (DKK)', \
+        seperate_y_axis=False, y_axis_label='Coin Value (USD)', scale='log')
+    ctl.df_scatter(btc_in_dkk_price, 'Cryptocurrency Prices (DKK)', \
+        seperate_y_axis=False, y_axis_label='Coin Value (USD)')
+    
+#btc_in_dkk_price = usd_in_dkk_price.multiply(btc_usd_price_kraken['Weighted Price'], axis='index')
+#combined_df
+#combined_df_DKK = usd_in_dkk_price.multiply(combined_df,  axis='index')
+#combined_df_DKK = combined_df.multiply( usd_in_dkk_price, axis='index')
+#combined_df.index.name = 'Date'
+#usd_in_dkk_price = usd_in_dkk_price.asfreq = 'D'
+#intersect = pd.merge(combined_df, usd_in_dkk_price, how='inner')
+intersect = combined_df.merge( usd_in_dkk_price ).dropna()
+combined_df_DKK = (combined_df * usd_in_dkk_price).dropna()
+combined_df_DKK = combined_df[combined_df.columns].multiply( usd_in_dkk_price, axis=0).dropna()
+combined_df_DKK = combined_df.multiply( usd_in_dkk_price, axis='index').dropna()
+ctl.df_scatter(combined_df_DKK, 'Cryptocurrency Prices (DKK)', seperate_y_axis=False, y_axis_label='Coin Value (DKK)', scale='log')
+ctl.df_scatter(combined_df_DKK, 'Cryptocurrency Prices (DKK)', seperate_y_axis=False, y_axis_label='Coin Value (DKK)')
 
 
 # Step 3.4 - Perform Correlation Analysis

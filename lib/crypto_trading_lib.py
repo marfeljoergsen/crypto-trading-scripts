@@ -60,7 +60,7 @@ def merge_dfs_on_column(dataframes, labels, col):
     series_dict = {}
     for index in range(len(dataframes)):
         series_dict[labels[index]] = dataframes[index][col]
-    return pd.DataFrame(series_dict)
+    return pd.DataFrame(series_dict) # convert dict to Pandas DF
 
 
 

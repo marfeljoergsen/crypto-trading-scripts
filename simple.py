@@ -29,19 +29,6 @@ print("We can inspect the first 5 rows of the dataframe using the head() method:
 print( btc_usd_price_kraken.head() )
 
 
-# Chart the BTC pricing data
-if usePlotly:
-    btc_trace = go.Scatter(x=btc_usd_price_kraken.index, y=btc_usd_price_kraken['Weighted Price'])
-    if useJupyterNotebook:
-        py.iplot([btc_trace])
-    else:
-        py.plot([btc_trace])
-else:
-    btc_trace = plt.plot(btc_usd_price_kraken.index, btc_usd_price_kraken['Weighted Price'])
-    plt.grid(True)
-    plt.title("Price for 1 btc in usd (kraken)")
-    plt.show()
-
 #pdb.set_trace()
 # Here, we're using Plotly for generating our visualizations. This is
 # a less traditional choice than some of the more established Python
@@ -74,8 +61,7 @@ for exchange in exchanges:
 
 btc_usd_datasets = ctl.merge_dfs_on_column( \
     list(exchange_data.values()), \
-    list(exchange_data.keys()), \
-    'Weighted Price' )
+    list(exchange_data.keys()), 'Weighted Price' )
 print("btc_usd_datasets = ")
 print( btc_usd_datasets.tail() )
 
@@ -134,51 +120,38 @@ eur_usd_price = ctl.get_quandl_data('BUNDESBANK/BBEX3_D_USD_EUR_BB_AC_000', data
 
 
 # EUR/DKK (ECB/EURDKK): https://www.quandl.com/data/ECB/EURDKK-EUR-vs-DKK-Foreign-Exchange-Reference-Rate
-one_eur_in_dkk_price = ctl.get_quandl_data('ECB/EURDKK', dataDir)
-#one_eur_in_dkk_price = ctl.get_crypto_data
-#ctl.df_scatter(one_eur_in_dkk_price, 'Price for 1 EUR in DKK')
+eur_in_dkk_price = ctl.get_quandl_data('ECB/EURDKK', dataDir)
+#eur_in_dkk_price = ctl.get_crypto_data
+#ctl.df_scatter(eur_in_dkk_price, 'Price for 1 EUR in DKK')
 
 
 # Multiplication - to get 1 USD in DKK - historic rates
 # =====================================================
-print("Converting to EUR + DKK (incomplete - ToDo)...")
+plt.close('all') # Clean up - strictly not required
+print("Converting to DKK")
 
-#one_usd_in_dkk_price = eur_usd_price * one_eur_in_dkk_price
-one_usd_in_dkk_price = one_eur_in_dkk_price / eur_usd_price
-ctl.df_scatter(one_usd_in_dkk_price, 'Price for 1 USD in DKK')
-one_usd_in_dkk_price=one_usd_in_dkk_price.asfreq('D')
+#usd_in_dkk_price = eur_usd_price * eur_in_dkk_price
+usd_in_dkk_price = eur_in_dkk_price / eur_usd_price
+if False:
+    ctl.df_scatter(usd_in_dkk_price, 'Price for 1 USD in DKK')
+#usd_in_dkk_price=usd_in_dkk_price.asfreq('D')
 
-#plt.close('all')
+# import IPython; IPython.terminal.debugger.TerminalPdb().set_trace()
+btc_in_dkk_price = usd_in_dkk_price.multiply(btc_usd_price_kraken['Weighted Price'], axis='index') # maybe: .dropna()
+# ctl.df_scatter(btc_in_dkk_price, 'Bitcoin Price (in DKK)')
 
-# ----
-#btc_dkk_dataset = btc_usd_datasets['avg_btc_price_usd'] * one_usd_in_dkk_price
+if True:
+    btc_in_dkk_price.replace(0, np.nan, inplace=True)
 
-#resampled_usd_in_dkk = one_usd_in_dkk_price.resample('B')
-#interpolated_usd_in_dkk = resampled_usd_in_dkk.interpolate(method='linear')
-#ctl.df_scatter(interpolated_usd_in_dkk, 'Price for 1 USD in DKK - resampled and interpolated!')
-
-#if False: #True:
-#    btc_usd_aligned, usd_in_dkk_aligned = btc_usd_datasets['avg_btc_price_usd'] .align(interpolated_usd_in_dkk)
-#    btc_dkk_dataset = btc_usd_aligned['avg_btc_price_usd']  * usd_in_dkk_aligned
-#else:
-#    btc_dkk_dataset = \
-#        btc_usd_datasets['avg_btc_price_usd'] * \
-#        interpolated_usd_in_dkk
-
-
-#ctl.df_scatter(btc_dkk_dataset, 'xxx')
-
-#if usePlotly:
-#    btc_trace = go.Scatter(x=btc_dkk_dataset.index, y=btc_dkk_dataset)
-#    if useJupyterNotebook:
-#        py.iplot([btc_trace])
-#    else:
-#        py.plot([btc_trace])
-#else:
-#    plt.plot( btc_dkk_dataset.index, btc_dkk_dataset )
-#    plt.grid(True)
-#    plt.legend()
-#    plt.show()
-
-
-# exit(0)
+if usePlotly:
+    btc_trace = go.Scatter(x=btc_in_dkk_price.index, y=btc_in_dkk_price)
+    if useJupyterNotebook:
+        py.iplot([btc_trace])
+    else:
+        py.plot([btc_trace])
+else:
+    plt.plot( btc_in_dkk_price.index, btc_in_dkk_price )
+    plt.title("Historic price for 1 BTC in DKK")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
