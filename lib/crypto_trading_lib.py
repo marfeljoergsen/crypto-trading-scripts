@@ -64,7 +64,8 @@ def merge_dfs_on_column(dataframes, labels, col):
 
 
 
-def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear', initial_hide=False):
+def df_scatter(df, title, seperate_y_axis=False, y_axis_label='',
+               scale='linear', initial_hide=False, connGaps=False):
     '''Generate a scatter plot of the entire dataframe'''
 
     global usePlotly, useJupyterNotebook
@@ -100,7 +101,8 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
                 x=series.index,
                 y=series,
                 name=label_arr[index],
-                visible=visibility
+                visible=visibility,
+                connectgaps = connGaps
             )
             # Add seperate axis for the series
             if seperate_y_axis:

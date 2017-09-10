@@ -13,6 +13,7 @@ from lib import crypto_trading_lib as ctl
 import sys
 sys.path.insert(0, './lib')
 from plot_settings import *
+import time # plotly needs time to switch/open new browser tab
 #import pdb
 
 #---
@@ -69,7 +70,9 @@ for altcoin in altcoins:
     altcoin_data[altcoin] = crypto_price_df # adding Pandas DF to dict
 
 
-plt.close('all')
+if not usePlotly:
+    plt.close('all')
+
 print("Converting to DKK")
 eur_usd_price = ctl.get_quandl_data('BUNDESBANK/BBEX3_D_USD_EUR_BB_AC_000', dataDir)
 eur_in_dkk_price = ctl.get_quandl_data('ECB/EURDKK', dataDir)
@@ -87,14 +90,57 @@ if False:
 btc_in_dkk_price = usd_in_dkk_price.multiply(btc_usd_price_kraken['Weighted Price'], axis='index') # maybe: .dropna()
 
 if True:
-    btc_in_dkk_price.replace(0, np.nan, inplace=True) # Convert 0's to NaN's
-    btc_in_dkk_price.interpolate() # interpolate to remove NaN's
-if  False: #True:
-    plt.plot( btc_in_dkk_price.index, btc_in_dkk_price )
-    plt.title("Historical price for 1 BTC in DKK")
-    plt.grid(True)
-    plt.legend()
-    plt.show()
+    titl = "Historical price for 1 BTC in DKK"
+    if usePlotly:
+        layout = go.Layout( title=titl, xaxis=dict(type='date'),
+                            yaxis=dict( title='1 BTC Price in DKK') )
+        trace_arr = []
+        btc_trace = go.Scatter(x=btc_in_dkk_price.index,
+                            y=btc_in_dkk_price['Value'], name='1 BTC price converted to DKK')
+        trace_arr.append(btc_trace)
+        fig = go.Figure(data=trace_arr, layout=layout)
+        if useJupyterNotebook:
+            py.iplot(fig)
+        else:
+            py.plot(fig)
+        print("Waiting " + str(plotlyDelay) +
+              " seconds for browser to open up figure: " + titl )
+        time.sleep(plotlyDelay)
+
+    else:
+        plt.plot( btc_in_dkk_price.index, btc_in_dkk_price )
+        plt.title(titl)
+        plt.grid(True)
+        plt.legend()
+        plt.show()
+
+if True: # Print stats
+    print("="*50)
+    print("btc_in_dkk_price.first_valid_index() = " + str(btc_in_dkk_price.first_valid_index()))
+    print("btc_in_dkk_price.last_valid_index() = " + str(btc_in_dkk_price.last_valid_index()))
+    print("Fraction of valid vs invalid values in btc_in_dkk_price: " + str( btc_in_dkk_price['Value'].count() / len(btc_in_dkk_price)) )
+    print("Number of NaN's: " + str( btc_in_dkk_price['Value'].isnull().sum() ))
+    print("Number of 0's: " + str( sum(btc_in_dkk_price['Value'] == 0 )))
+
+if True: # remove invalid indices:
+    btc_in_dkk_price = btc_in_dkk_price[ btc_in_dkk_price['Value'].notnull() ] # remove unused indices
+    print("Number of 0'values (to be replaced with NaN): " + str(np.sum( btc_in_dkk_price['Value']==0 )) )
+    btc_in_dkk_price.replace(0, np.nan, inplace=True) # replace 0 with NaN
+    print("Number of 0'values: " + str(np.sum( btc_in_dkk_price['Value']==0 )) )
+
+if True: # Remove NaN-values:
+    print("  *** WARNING: Removing NaN-values by interpolation! ***")
+    print("Number of NaN values: " + str(np.sum( np.isnan( btc_in_dkk_price['Value'] )) ) )
+    btc_in_dkk_price = btc_in_dkk_price.interpolate() # interpolate to remove NaN's
+    print("Number of NaN values: " + str(np.sum( np.isnan( btc_in_dkk_price['Value'] )) ) )
+
+if True: # Print stats again
+    print("Fraction of valid vs invalid values in btc_in_dkk_price: " + str( btc_in_dkk_price['Value'].count() / len(btc_in_dkk_price)) )
+    print("Number of NaN's: " + str( btc_in_dkk_price['Value'].isnull().sum() ))
+    print("Number of 0'values: " + str(np.sum( btc_in_dkk_price['Value']==0 )) )
+
+if False: #True: # write to Excel
+    btc_in_dkk_price.to_excel('btc_in_dkk_price.xls')
 
 
 # Calculate the historical FIAT-currency values for each altcoin.
@@ -103,6 +149,8 @@ if False:
     for altcoin in altcoin_data.keys():
         altcoin_data[altcoin]['price'] = \
             altcoin_data[altcoin]['weightedAverage'] * btc_usd_datasets['avg_btc_price_usd']
+        if False: # True: # Drop NaN!
+            altcoin_data[altcoin]['price'] = altcoin_data[altcoin]['price'].dropna()
     # Create a combined dataframe of the price for each cryptocurrency, into single dataframe
     combined_df = ctl.merge_dfs_on_column( list(altcoin_data.values()), list(altcoin_data.keys()), 'price' )
     combined_df['BTC'] = btc_usd_datasets['avg_btc_price_usd'] # Add BTC price to the dataframe
@@ -112,19 +160,20 @@ else:
         altcoin_data[altcoin]['price'] = \
             altcoin_data[altcoin]['weightedAverage'] * btc_usd_datasets['avg_btc_price_usd']
         altcoin_data[altcoin]['price'] = altcoin_data[altcoin]['price'] * usd_in_dkk_price['Value']
+        if False: #True: # Drop NaN!
+            altcoin_data[altcoin]['price'] = altcoin_data[altcoin]['price'].dropna()
     # Create a combined dataframe of the price for each cryptocurrency, into single dataframe
     combined_df = ctl.merge_dfs_on_column( list(altcoin_data.values()), list(altcoin_data.keys()), 'price' )
     combined_df['BTC'] = btc_usd_datasets['avg_btc_price_usd'] * usd_in_dkk_price['Value']
 
+
 # Chart all of the altocoin prices
 if True: # False:
     ctl.df_scatter(combined_df, 'Cryptocurrency Prices (' + FIAT_curr + ')', seperate_y_axis=False, \
-            y_axis_label='Coin Value (' + FIAT_curr + ')', scale='log')
+                   y_axis_label='Coin Value (' + FIAT_curr + ')', scale='log', connGaps=True)
     ctl.df_scatter(combined_df, 'Cryptocurrency Prices (' + FIAT_curr + ')', seperate_y_axis=False, \
-            y_axis_label='Coin Value (' + FIAT_curr + ')')
+                   y_axis_label='Coin Value (' + FIAT_curr + ')', connGaps=True)
 # Note that we're using a logarithmic y-axis scale in order to compare
 # all of the currencies on the same plot. You are welcome to try out
 # different parameters values here (such as scale='linear') to get
 # different perspectives on the data.
-
-plt.close('all') # Clean up - strictly not required
