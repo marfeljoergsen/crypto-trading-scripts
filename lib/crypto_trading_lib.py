@@ -3,9 +3,13 @@ from datetime import datetime
 import pandas as pd
 import quandl
 import sys
-sys.path.insert(0, './lib')
 from plot_settings import *
 import time # plotly needs time to switch/open new browser tab
+
+start_date = datetime.strptime('2015-01-01', '%Y-%m-%d') # get data from the start of 2015
+#start_date = datetime.strptime('2017-07-01', '%Y-%m-%d')
+end_date = datetime.now() # up until today
+pediod = 86400 # pull daily data (86,400 seconds per day)
 
 # =================================
 #usePlotly = True # for jupyter notebook (plotly)
@@ -162,14 +166,10 @@ def get_json_data(json_url, cache_path):
 # requests, and will subsequently call our new get_json_data function
 # to save the resulting data.
 
-base_polo_url = 'https://poloniex.com/public?command=returnChartData&currencyPair={}&start={}&end={}&period={}'
-start_date = datetime.strptime('2015-01-01', '%Y-%m-%d') # get data from the start of 2015
-#start_date = datetime.strptime('2017-07-01', '%Y-%m-%d')
-end_date = datetime.now() # up until today
-pediod = 86400 # pull daily data (86,400 seconds per day)
 
 def get_crypto_data(poloniex_pair, dataDir):
     '''Retrieve cryptocurrency data from poloniex'''
+    base_polo_url = 'https://poloniex.com/public?command=returnChartData&currencyPair={}&start={}&end={}&period={}'
     json_url = base_polo_url.format(poloniex_pair, start_date.timestamp(), end_date.timestamp(), pediod)
     data_df = get_json_data(json_url, dataDir + poloniex_pair)
     data_df = data_df.set_index('date')
