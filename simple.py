@@ -141,9 +141,38 @@ if False:
 btc_in_dkk_price = usd_in_dkk_price.multiply(btc_usd_price_kraken['Weighted Price'], axis='index') # maybe: .dropna()
 # ctl.df_scatter(btc_in_dkk_price, 'Bitcoin Price (in DKK)')
 
+
+if True: # Print stats
+    print("="*50)
+    print("btc_in_dkk_price.first_valid_index() = " + str(btc_in_dkk_price.first_valid_index()))
+    print("btc_in_dkk_price.last_valid_index() = " + str(btc_in_dkk_price.last_valid_index()))
+    print("Fraction of valid vs invalid values in btc_in_dkk_price: " + str( btc_in_dkk_price['Value'].count() / len(btc_in_dkk_price)) )
+    print("Number of NaN's: " + str( btc_in_dkk_price['Value'].isnull().sum() ))
+
+if True: # remove invalid indices:
+    btc_in_dkk_price = btc_in_dkk_price[ btc_in_dkk_price['Value'].notnull() ] # remove unused indices
+    print("Number of 0'values: " + str(np.sum( btc_in_dkk_price['Value']==0 )) )
+    btc_in_dkk_price.replace(0, np.nan, inplace=True) # replace 0 with NaN
+    print("Number of 0'values: " + str(np.sum( btc_in_dkk_price['Value']==0 )) )
+
+if True: # Remove NaN-values:
+    print("  *** WARNING: Removing NaN-values by interpolation! ***")
+    print("Number of NaN values: " + str(np.sum( np.isnan( btc_in_dkk_price['Value'] )) ) )
+    btc_in_dkk_price = btc_in_dkk_price.interpolate() # interpolate to remove NaN's
+    print("Number of NaN values: " + str(np.sum( np.isnan( btc_in_dkk_price['Value'] )) ) )
+    
+if True: # Print stats again
+    print("btc_in_dkk_price.first_valid_index() = " + str(btc_in_dkk_price.first_valid_index()))
+    print("btc_in_dkk_price.last_valid_index() = " + str(btc_in_dkk_price.last_valid_index()))
+    print("Fraction of valid vs invalid values in btc_in_dkk_price: " + str( btc_in_dkk_price['Value'].count() / len(btc_in_dkk_price)) )
+    print("Number of NaN's: " + str( btc_in_dkk_price['Value'].isnull().sum() ))
+
+if True: # write to Excel
+    btc_in_dkk_price.to_excel('btc_in_dkk_price.xls')
+
 if True:
-    btc_in_dkk_price.replace(0, np.nan, inplace=True)
-    btc_in_dkk_price.interpolate() # interpolate to remove NaN's
+    print("Fraction of valid vs invalid values in btc_in_dkk_price: " + str( btc_in_dkk_price['Value'].count() / len(btc_in_dkk_price)) )
+    print("Number of NaN's: " + str( btc_in_dkk_price['Value'].isnull().sum() ))
 
 titl = "Historical price for 1 BTC in DKK"
 if usePlotly:
