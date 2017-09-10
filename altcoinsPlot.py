@@ -18,8 +18,7 @@ import time # plotly needs time to switch/open new browser tab
 
 #---
 dataDir = 'data/'
-
-
+altcoinsFile = 'altcoins.txt'
 
 # Step 2.2 - Pull Kraken Exchange Pricing Data
 # --------------------------------------------
@@ -60,7 +59,11 @@ btc_usd_datasets['avg_btc_price_usd'] = btc_usd_datasets.mean(axis=1)
 # Ethereum, Litecoin, Ripple, Ethereum Classic, Stellar, Dashcoin,
 # Siacoin, Monero, and NEM.
 
-altcoins = ['ETH','LTC','XRP','ETC','STR','DASH','SC','XMR','XEM']
+if False:
+    altcoins = ['ETH','LTC','XRP','ETC','STR','DASH','SC','XMR','XEM']
+else:
+    with open(altcoinsFile) as f:
+        altcoins = f.read().splitlines()
 print("Downloading data for these altcoins: ",  altcoins)
 
 altcoin_data = {} # dict
@@ -89,7 +92,7 @@ if False:
 
 btc_in_dkk_price = usd_in_dkk_price.multiply(btc_usd_price_kraken['Weighted Price'], axis='index') # maybe: .dropna()
 
-if True:
+if False: # True:
     titl = "Historical price for 1 BTC in DKK"
     if usePlotly:
         layout = go.Layout( title=titl, xaxis=dict(type='date'),
@@ -169,9 +172,9 @@ else:
 
 # Chart all of the altocoin prices
 if True: # False:
-    ctl.df_scatter(combined_df, 'Cryptocurrency Prices (' + FIAT_curr + ')', seperate_y_axis=False, \
+    ctl.df_scatter(combined_df, 'Cryptocurrency Prices - y-LOG (' + FIAT_curr + ')', seperate_y_axis=False, \
                    y_axis_label='Coin Value (' + FIAT_curr + ')', scale='log', connGaps=True)
-    ctl.df_scatter(combined_df, 'Cryptocurrency Prices (' + FIAT_curr + ')', seperate_y_axis=False, \
+    ctl.df_scatter(combined_df, 'Cryptocurrency Prices - y-Linear (' + FIAT_curr + ')', seperate_y_axis=False, \
                    y_axis_label='Coin Value (' + FIAT_curr + ')', connGaps=True)
 # Note that we're using a logarithmic y-axis scale in order to compare
 # all of the currencies on the same plot. You are welcome to try out
