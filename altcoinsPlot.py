@@ -8,17 +8,22 @@
 # =============================================================
 
 import numpy as np
-#import pandas as pd
+import pandas as pd
 from lib import crypto_trading_lib as ctl
 import sys
 sys.path.insert(0, './lib')
 from plot_settings import *
 import time # plotly needs time to switch/open new browser tab
+from datetime import datetime
 #import pdb
 
 #---
 dataDir = 'data/'
 altcoinsFile = 'altcoins.txt'
+start_date = datetime.strptime('2016-01-01', '%Y-%m-%d') # get data from the start of 2015
+#start_date = datetime.strptime('2017-07-01', '%Y-%m-%d')
+#---
+
 
 # Step 2.2 - Pull Kraken Exchange Pricing Data
 # --------------------------------------------
@@ -69,7 +74,7 @@ print("Downloading data for these altcoins: ",  altcoins)
 altcoin_data = {} # dict
 for altcoin in altcoins:
     coinpair = 'BTC_{}'.format(altcoin)
-    crypto_price_df = ctl.get_crypto_data(coinpair, dataDir)
+    crypto_price_df = ctl.get_crypto_data(coinpair, start_date, dataDir)
     altcoin_data[altcoin] = crypto_price_df # adding Pandas DF to dict
 
 
@@ -167,7 +172,20 @@ else:
             altcoin_data[altcoin]['price'] = altcoin_data[altcoin]['price'].dropna()
     # Create a combined dataframe of the price for each cryptocurrency, into single dataframe
     combined_df = ctl.merge_dfs_on_column( list(altcoin_data.values()), list(altcoin_data.keys()), 'price' )
-    combined_df['BTC'] = btc_usd_datasets['avg_btc_price_usd'] * usd_in_dkk_price['Value']
+    BTCinDKK = btc_usd_datasets['avg_btc_price_usd'] * usd_in_dkk_price['Value']
+    combined_df['BTC'] = BTCinDKK
+    
+    if True: # chop useless dates
+        print("Removing early ticker info from before: " + str(start_date))
+        BTCinDKK = BTCinDKK[ BTCinDKK.index >= start_date ]
+        
+    if True: # Write to Excel
+        excelOutputFile = 'CryptoData.xlsx'
+        print("Writing to Excel file: " + excelOutputFile)
+        with pd.ExcelWriter(excelOutputFile) as writer:
+            BTCinDKK.to_excel(writer, "BTC") # Write BTC as first sheet
+            for altcoin in altcoin_data.keys():
+                altcoin_data[altcoin]['price'].to_excel(writer,  altcoin) # Write to following sheets
 
 
 # Chart all of the altocoin prices
