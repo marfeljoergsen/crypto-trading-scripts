@@ -151,7 +151,7 @@ if usePlotly:
         py.plot([btc_trace])
 else:
     plt.plot( btc_in_dkk_price.index, btc_in_dkk_price )
-    plt.title("Historic price for 1 BTC in DKK")
+    plt.title("Historical price for 1 BTC in DKK")
     plt.grid(True)
     plt.legend()
     plt.show()

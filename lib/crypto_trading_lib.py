@@ -67,10 +67,11 @@ def merge_dfs_on_column(dataframes, labels, col):
 def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear', initial_hide=False):
     '''Generate a scatter plot of the entire dataframe'''
 
-    label_arr = list(df)
-    series_arr = list(map(lambda col: df[col], label_arr))
-
     global usePlotly, useJupyterNotebook
+
+    label_arr = list(df) # = ['DASH', 'ETC', 'ETH', 'LTC', 'SC', 'STR', 'XEM', 'XMR', 'XRP', 'BTC']
+    series_arr = list(map(lambda col: df[col], label_arr)) # list of map(function, iterable, ...)
+    trace_arr = [] # Form Trace For Each Series
 
     if usePlotly:
         layout = go.Layout(
@@ -84,18 +85,15 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
             )
         )
 
-    y_axis_config = dict(
-        overlaying='y',
-        showticklabels=False,
-        type=scale )
+        y_axis_config = dict(
+            overlaying='y',
+            showticklabels=False,
+            type=scale )
 
-    visibility = 'visible'
-    if initial_hide:
-        visibility = 'legendonly'
+        visibility = 'visible'
+        if initial_hide:
+            visibility = 'legendonly'
 
-    # Form Trace For Each Series
-    trace_arr = []
-    if usePlotly:
         for index, series in enumerate(series_arr):
             trace = go.Scatter(
                 x=series.index,
@@ -118,12 +116,13 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
 
     else:
         # Use Matplotlib instead of plotly:
-        for index, series in enumerate(series_arr):
+        for index, series in enumerate(series_arr): # series_arr = list(map(lambda col: df[col], label_arr)),
+            # where label_arr = ['DASH', 'ETC', 'ETH', 'LTC', 'SC', 'STR', 'XEM', 'XMR', 'XRP', 'BTC']
             trace = { "x" : series.index, "y" : series, "name" : label_arr[index] }
             trace_arr.append(trace)
 
         for i in range(len(trace_arr)):
-            plt.plot(trace_arr[i]["x"],  trace_arr[i]["y"],  label = 'id %s'%trace_arr[i]["name"])
+            plt.plot(trace_arr[i]["x"],  trace_arr[i]["y"],  label = '%s'%trace_arr[i]["name"])
         if scale=='log':
             plt.yscale('log')
         plt.grid(True)
