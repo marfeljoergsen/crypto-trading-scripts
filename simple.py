@@ -8,11 +8,11 @@
 # =============================================================
 
 import numpy as np
-#import pandas as pd
+import pandas as pd
 from lib import crypto_trading_lib as ctl
 #import pdb
 from plot_settings import *
-
+import time # plotly needs time to switch/open new browser tab
 #---
 dataDir = 'data/'
 
@@ -22,12 +22,6 @@ dataDir = 'data/'
 # --------------------------------------------
 # Pull Kraken BTC price exchange data
 btc_usd_price_kraken = ctl.get_quandl_data('BCHARTS/KRAKENUSD', dataDir)
-
-
-# We can inspect the first 5 rows of the dataframe using the head() method.
-print("We can inspect the first 5 rows of the dataframe using the head() method:")
-print( btc_usd_price_kraken.head() )
-
 
 #pdb.set_trace()
 # Here, we're using Plotly for generating our visualizations. This is
@@ -62,8 +56,8 @@ for exchange in exchanges:
 btc_usd_datasets = ctl.merge_dfs_on_column( \
     list(exchange_data.values()), \
     list(exchange_data.keys()), 'Weighted Price' )
-print("btc_usd_datasets = ")
-print( btc_usd_datasets.tail() )
+#print("btc_usd_datasets = ")
+#print( btc_usd_datasets.tail() )
 
 
 # Step 2.5 - Visualize The Pricing Datasets
@@ -96,20 +90,28 @@ ctl.df_scatter(btc_usd_datasets, 'Bitcoin Price (USD) By Exchange (0-values remo
 # Bitcoin price across all of the exchanges.
 btc_usd_datasets['avg_btc_price_usd'] = btc_usd_datasets.mean(axis=1)
 
-# This new column is our Bitcoin pricing index! Let's chart that
-# column to make sure it looks ok.
 if usePlotly:
-    btc_trace = go.Scatter(x=btc_usd_datasets.index, y=btc_usd_datasets['avg_btc_price_usd'])
+    layout = go.Layout( title='Avg BTC price in USD', xaxis=dict(type='date'),
+                        yaxis=dict( title='avg_btc_price_usd') )
+    trace_arr = []
+    btc_trace = go.Scatter(x=btc_usd_datasets['avg_btc_price_usd'].index,
+                           y=btc_usd_datasets['avg_btc_price_usd'],
+                           name='avg_btc_price_usd')
+    trace_arr.append(btc_trace)
+    fig = go.Figure(data=trace_arr, layout=layout)
     if useJupyterNotebook:
-        py.iplot([btc_trace])
+        py.iplot(fig)
     else:
-        py.plot([btc_trace])
+        py.plot(fig)
+    print("Waiting " + str(plotlyDelay) +
+          " seconds for browser to open up figure: avg_btc_price_usd...")
+    time.sleep(plotlyDelay)
+
 else:
     plt.plot( btc_usd_datasets.index, btc_usd_datasets['avg_btc_price_usd'] )
     plt.grid(True)
     plt.legend()
     plt.show()
-
     #pdb.set_trace()
 
 
@@ -127,7 +129,6 @@ eur_in_dkk_price = ctl.get_quandl_data('ECB/EURDKK', dataDir)
 
 # Multiplication - to get 1 USD in DKK - historic rates
 # =====================================================
-plt.close('all') # Clean up - strictly not required
 print("Converting to DKK")
 
 #usd_in_dkk_price = eur_usd_price * eur_in_dkk_price
@@ -142,16 +143,27 @@ btc_in_dkk_price = usd_in_dkk_price.multiply(btc_usd_price_kraken['Weighted Pric
 
 if True:
     btc_in_dkk_price.replace(0, np.nan, inplace=True)
+    btc_in_dkk_price.interpolate() # interpolate to remove NaN's
 
+titl = "Historical price for 1 BTC in DKK"
 if usePlotly:
-    btc_trace = go.Scatter(x=btc_in_dkk_price.index, y=btc_in_dkk_price)
+    layout = go.Layout( title=titl, xaxis=dict(type='date') )
+    btc_trace_arr = []
+    btc_trace_arr.append( go.Scatter(x=btc_in_dkk_price.index, y=btc_in_dkk_price['Value']) )
+    fig = go.Figure(data=btc_trace_arr, layout=layout)
     if useJupyterNotebook:
-        py.iplot([btc_trace])
+        py.iplot(fig)
     else:
-        py.plot([btc_trace])
+        py.plot(fig)
+    print("Waiting " + str(plotlyDelay) +
+          " seconds for browser to open up figure: btc_in_dkk_price...")
+    time.sleep(plotlyDelay)
+
 else:
     plt.plot( btc_in_dkk_price.index, btc_in_dkk_price )
-    plt.title("Historical price for 1 BTC in DKK")
+    plt.title(titl)
     plt.grid(True)
     plt.legend()
     plt.show()
+
+# plt.close('all') # Clean up - strictly not required

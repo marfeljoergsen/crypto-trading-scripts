@@ -5,7 +5,7 @@ import quandl
 import sys
 sys.path.insert(0, './lib')
 from plot_settings import *
-
+import time # plotly needs time to switch/open new browser tab
 
 # =================================
 #usePlotly = True # for jupyter notebook (plotly)
@@ -71,7 +71,6 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
 
     label_arr = list(df) # = ['DASH', 'ETC', 'ETH', 'LTC', 'SC', 'STR', 'XEM', 'XMR', 'XRP', 'BTC']
     series_arr = list(map(lambda col: df[col], label_arr)) # list of map(function, iterable, ...)
-    trace_arr = [] # Form Trace For Each Series
 
     if usePlotly:
         layout = go.Layout(
@@ -94,6 +93,8 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
         if initial_hide:
             visibility = 'legendonly'
 
+        # Form Trace For Each Series
+        trace_arr = []
         for index, series in enumerate(series_arr):
             trace = go.Scatter(
                 x=series.index,
@@ -101,7 +102,6 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
                 name=label_arr[index],
                 visible=visibility
             )
-
             # Add seperate axis for the series
             if seperate_y_axis:
                 trace['yaxis'] = 'y{}'.format(index + 1)
@@ -113,7 +113,9 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='', scale='linear'
             py.iplot(fig)
         else:
             py.plot(fig)
-
+        print("Waiting " + str(plotlyDelay) +
+              " second(s) for browser to open figure: " + layout.title)
+        time.sleep(plotlyDelay)
     else:
         # Use Matplotlib instead of plotly:
         for index, series in enumerate(series_arr): # series_arr = list(map(lambda col: df[col], label_arr)),
