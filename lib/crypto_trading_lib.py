@@ -73,6 +73,7 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='',
     label_arr = list(df) # = ['DASH', 'ETC', 'ETH', 'LTC', 'SC', 'STR', 'XEM', 'XMR', 'XRP', 'BTC']
     series_arr = list(map(lambda col: df[col], label_arr)) # list of map(function, iterable, ...)
 
+    trace_arr = []
     if usePlotly:
         layout = go.Layout(
             title=title,
@@ -95,7 +96,6 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='',
             visibility = 'legendonly'
 
         # Form Trace For Each Series
-        trace_arr = []
         for index, series in enumerate(series_arr):
             trace = go.Scatter(
                 x=series.index,
