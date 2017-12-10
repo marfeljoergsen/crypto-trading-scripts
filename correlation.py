@@ -71,7 +71,7 @@ def correlation_heatmap(df, title, absolute_bounds=True):
         print(z)
         x=df.columns.tolist()
         y=df.columns.tolist()
-        title='Pearson Coefficient'
+        titleStr='Pearson Coefficient: ' + title
         # ----
         #fig, ax = plt.subplots()
         #fig, ax = plt.subplots(figsize=(x, y)
@@ -86,6 +86,7 @@ def correlation_heatmap(df, title, absolute_bounds=True):
 
         #plt.xticks(range(len(z.columns)), z.columns);
         #plt.yticks(range(len(z.columns)), z.columns);
+        plt.title(titleStr)
         plt.show()
         #pdb.set_trace()
 
