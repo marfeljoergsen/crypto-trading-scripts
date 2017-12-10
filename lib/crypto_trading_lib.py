@@ -122,11 +122,14 @@ def df_scatter(df, title, seperate_y_axis=False, y_axis_label='',
         # Use Matplotlib instead of plotly:
         for index, series in enumerate(series_arr): # series_arr = list(map(lambda col: df[col], label_arr)),
             # where label_arr = ['DASH', 'ETC', 'ETH', 'LTC', 'SC', 'STR', 'XEM', 'XMR', 'XRP', 'BTC']
+            if connGaps:
+                series = series.dropna() # remove NaN's to avoid "holes" in graph
             trace = { "x" : series.index, "y" : series, "name" : label_arr[index] }
             trace_arr.append(trace)
 
         for i in range(len(trace_arr)):
-            plt.plot(trace_arr[i]["x"],  trace_arr[i]["y"],  label = '%s'%trace_arr[i]["name"])
+                plt.plot(trace_arr[i]["x"].to_pydatetime(),
+                         trace_arr[i]["y"], label='%s' % trace_arr[i]["name"])
         if scale=='log':
             plt.yscale('log')
         plt.grid(True)

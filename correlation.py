@@ -94,8 +94,8 @@ def correlation_heatmap(df, title, absolute_bounds=True):
 # ---
 dataDir = 'data/'
 altcoinsFile = 'altcoins.txt'
-start_date = datetime.strptime('2016-01-01', '%Y-%m-%d')  # get data from the start of 2015
-# start_date = datetime.strptime('2017-07-01', '%Y-%m-%d')
+#start_date = datetime.strptime('2016-01-01', '%Y-%m-%d')  # get data from the start of 2015
+start_date = datetime.strptime('2017-07-01', '%Y-%m-%d')
 # ---
 
 

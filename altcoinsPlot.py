@@ -179,7 +179,7 @@ else:
         print("Removing early ticker info from before: " + str(start_date))
         BTCinDKK = BTCinDKK[ BTCinDKK.index >= start_date ]
         
-    if True: # Write to Excel
+    if False: # Write to Excel
         excelOutputFile = 'CryptoData.xlsx'
         print("Writing to Excel file: " + excelOutputFile)
         with pd.ExcelWriter(excelOutputFile) as writer:
@@ -192,6 +192,7 @@ else:
 if True: # False:
     ctl.df_scatter(combined_df, 'Cryptocurrency Prices - y-LOG (' + FIAT_curr + ')', seperate_y_axis=False, \
                    y_axis_label='Coin Value (' + FIAT_curr + ')', scale='log', connGaps=True)
+if False:
     ctl.df_scatter(combined_df, 'Cryptocurrency Prices - y-Linear (' + FIAT_curr + ')', seperate_y_axis=False, \
                    y_axis_label='Coin Value (' + FIAT_curr + ')', connGaps=True)
 # Note that we're using a logarithmic y-axis scale in order to compare

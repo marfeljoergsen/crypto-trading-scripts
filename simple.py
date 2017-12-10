@@ -68,7 +68,7 @@ btc_usd_datasets = ctl.merge_dfs_on_column( \
 
 # We can now easily generate a graph for the Bitcoin pricing data.
 # # Plot all of the BTC exchange prices
-ctl.df_scatter(btc_usd_datasets, 'Bitcoin Price (USD) By Exchange')
+#ctl.df_scatter(btc_usd_datasets, 'Bitcoin Price (USD) By Exchange') # NB: NEED TO REMOVE 0-VALUES
 
 
 # Step 2.6 - Clean and Aggregate the Pricing Data
@@ -84,7 +84,7 @@ btc_usd_datasets.replace(0, np.nan, inplace=True)
 
 # When we re-chart the dataframe, we'll see a much cleaner looking
 # chart without the down-spikes:
-ctl.df_scatter(btc_usd_datasets, 'Bitcoin Price (USD) By Exchange (0-values removed)')
+ctl.df_scatter(btc_usd_datasets, 'Bitcoin Price (USD) By Exchange')
 
 # We can now calculate a new column, containing the average daily
 # Bitcoin price across all of the exchanges.
@@ -108,7 +108,7 @@ if usePlotly:
     time.sleep(plotlyDelay)
 
 else:
-    plt.plot( btc_usd_datasets.index, btc_usd_datasets['avg_btc_price_usd'] )
+    plt.plot( btc_usd_datasets.index.to_pydatetime(), btc_usd_datasets['avg_btc_price_usd'] )
     plt.grid(True)
     plt.legend()
     plt.show()
@@ -189,7 +189,8 @@ if usePlotly:
     time.sleep(plotlyDelay)
 
 else:
-    plt.plot( btc_in_dkk_price.index, btc_in_dkk_price )
+    #plt.plot( btc_in_dkk_price.index, btc_in_dkk_price )
+    plt.plot( btc_in_dkk_price.index.to_pydatetime(), btc_in_dkk_price )
     plt.title(titl)
     plt.grid(True)
     plt.legend()
