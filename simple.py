@@ -196,4 +196,41 @@ else:
     plt.legend()
     plt.show()
 
-# plt.close('all') # Clean up - strictly not required
+
+print("Experimenting with pyfolio-lib...")
+# from empyrical/utils.py / get_symbol_returns_from_yahoo:
+#    px = pandas_datareader.get_data_yahoo(symbol, ..start/end..)
+#    rets = px[['Adj Close']].pct_change().dropna()
+#   ...
+#
+
+#  ------ from pandas datareader / yahoo / daily.py:
+# ==== NB: Usage:
+# df['Ret_Index'] = _calc_return_index(df['Adj Close'])
+# df['Ret_Index'] = _calc_return_index(df['Adj Close'])
+
+
+# /usr/lib/python3.6/site-packages/pandas_datareader/yahoo
+# def _calc_return_index(price_df):
+#     """
+#     Return a returns index from a input price df or series. Initial value
+#     (typically NaN) is set to 1.
+#     """
+#     df = price_df.pct_change().add(1).cumprod()
+#     mask = df.iloc[1].notnull() & df.iloc[0].isnull()
+#     df.loc[df.index[0], mask] = 1
+#
+#     # Check for first stock listings after starting date of index in ret_index
+#     # If True, find first_valid_index and set previous entry to 1.
+#     if (~mask).any():
+#         for sym in mask.index[~mask]:
+#             sym_idx = df.columns.get_loc(sym)
+#             tstamp = df[sym].first_valid_index()
+#             t_idx = df.index.get_loc(tstamp) - 1
+#             df.iloc[t_idx, sym_idx] = 1
+#
+#     return df
+
+# NOW COMBINE WITH SCRIPTS IN "testing"-subdir
+
+plt.close('all') # Clean up - strictly not required

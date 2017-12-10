@@ -24,7 +24,7 @@ This has been tested on Python 3.6.3 (Linux).
 * Maybe GUI for interactive usage (ticker-selection)
 * Experiment with broker API for automated trading
 * Option for implementing indicators for use in technical analysis: RSI, MACD, Bollinger bands
-* Maybe add more advanced methods, e.g. FFT and/or machine learning methods
+* Add more advanced methods, e.g. maybe FFT, machine learning methods/principal component analysis/logistic regression/neural network, etc...
 
 
 ## License
